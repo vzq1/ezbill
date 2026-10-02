@@ -598,7 +598,7 @@ function openQrSheet(personId = null) {
 
 function summaryText() {
   const result = computeSplit(state);
-  const lines = ["Bill split", ...result.rows.map((r) => `${r.name}: ${peso.format(r.total)}`), ""];
+  const lines = ["EZBill", ...result.rows.map((r) => `${r.name}: ${peso.format(r.total)}`), ""];
   lines.push(`Food: ${peso.format(result.itemsTotal)}`);
   if (result.hasReceipt) {
     lines.push(`${result.extra >= 0 ? "Service charge" : "Discount"}: ${peso.format(result.extra)}`);

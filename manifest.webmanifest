@@ -1,6 +1,6 @@
 {
-  "name": "Bill Split",
-  "short_name": "Bill Split",
+  "name": "EZBill",
+  "short_name": "EZBill",
   "description": "Bon's bill splitting app: splits a restaurant bill between friends, shares out the service charge by what each person ordered, and shows Bon's GCash QR.",
   "start_url": "./",
   "scope": "./",

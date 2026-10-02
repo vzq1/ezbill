@@ -1,4 +1,4 @@
-# Bill Split
+# EZBill
 
 Bon's bill splitting app: an iPhone-style calculator for splitting a restaurant bill with friends. Add who ordered what, type in the total on the receipt, and it shares out the service charge by how much each person ordered, then shows Bon's GCash QR so everyone can pay.
 
@@ -25,7 +25,7 @@ Everyone's shares add up exactly to the receipt total, so you never need to know
 
 ## Using it on iPhone
 
-Open https://vzq1.github.io/bill-split/ in Safari, tap **Share → Add to Home Screen**, and name it **Bill Split**. It works offline after the first visit.
+Open https://vzq1.github.io/ezbill/ in Safari, tap **Share → Add to Home Screen**, and name it **EZBill**. It works offline after the first visit.
 
 Tap the moon at the top right for dark mode. The GCash QR stays on a white card in both modes so it always scans.
 
