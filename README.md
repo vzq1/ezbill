@@ -1,36 +1,41 @@
 # Bill Split
 
-A small web app for splitting a restaurant bill with friends.
+Bon's bill splitting app: an iPhone-style calculator for splitting a restaurant bill with friends. Add who ordered what, type in the total on the receipt, and it shares out the service charge by how much each person ordered, then shows Bon's GCash QR so everyone can pay.
 
-You don't need to know the service charge rate. Enter what everyone ordered and the total on the receipt, and the app divides that total among everyone in proportion to their food:
+## How the split works
+
+The receipt total is always more than the menu prices because of the service charge. The app adds up the food, takes whatever is left over on the receipt (service charge, other taxes) and gives each person a share of it at the same rate:
 
 ```
-your share = your food ÷ items total × receipt total
+your share = your food × receipt total ÷ food total
 ```
 
-Whatever the receipt adds on top of the menu prices (service charge, F&W tax, and so on) is shared out automatically, and everyone's shares add up exactly to the receipt total.
+Everyone's shares add up exactly to the receipt total, so you never need to know the service charge rate.
 
-## Features
+## Files
 
-- Add the people at the table and the items on the receipt
-- Assign each item to one person, or split it evenly or by custom amounts
-- Enter the receipt total and see what each person pays, including their share of the service charge
-- Share the split to a group chat
-- Works offline and can be added to your phone's home screen
+| File | What it is |
+| --- | --- |
+| `index.html` | The app's page |
+| `styles.css` | The iPhone-style look: glass cards, large titles and bottom sheets |
+| `app.js` | People, items, sheets and sharing |
+| `calc.js` | The split math |
+| `gcash-qr.svg` | Bon's GCash QR, redrawn from the GCash app's QR so it stays sharp at any size |
+| `sw.js`, `manifest.webmanifest`, `icons/` | Offline support and the Home Screen icon |
 
-## Use it on your phone
+## Using it on iPhone
 
-Open the site, then:
+Open https://vzq1.github.io/bill-split/ in Safari, tap **Share → Add to Home Screen**, and name it **Bill Split**. It works offline after the first visit.
 
-- **iPhone (Safari):** Share → Add to Home Screen
-- **Android (Chrome):** ⋮ menu → Add to Home screen
+## Running it locally
 
-## Run it locally
-
-No build step. Serve the folder with any static server:
+There's no build step. Serve the folder and open http://localhost:8000:
 
 ```
 python3 -m http.server
 ```
 
-Then open http://localhost:8000.
+## Credits
+
+- Look and feel follow Bonjour, Bon’s morning routine app.
+- GCash and InstaPay are trademarks of their respective owners.

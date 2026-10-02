@@ -1,4 +1,4 @@
-const CACHE = "bill-split-v2";
+const CACHE = "bill-split-v3";
 const FILES = [
   "./",
   "index.html",
@@ -10,6 +10,7 @@ const FILES = [
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/apple-touch-icon.png",
+  "gcash-qr.svg",
 ];
 
 self.addEventListener("install", (event) => {
