@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bill Split</title>
+  <meta name="description" content="Split a restaurant bill with friends, with the service charge computed on the price before VAT.">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Bill Split">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Bill Split</h1>
+    <button type="button" class="link-btn" id="new-bill">New bill</button>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Rates</h2>
+      <div class="rates">
+        <label class="field">
+          <span>Service charge</span>
+          <span class="suffix-input">
+            <input id="sc-rate" type="text" inputmode="decimal" autocomplete="off">
+            <span>%</span>
+          </span>
+        </label>
+        <label class="field">
+          <span>VAT</span>
+          <span class="suffix-input">
+            <input id="vat-rate" type="text" inputmode="decimal" autocomplete="off">
+            <span>%</span>
+          </span>
+        </label>
+        <label class="field">
+          <span>Other tax</span>
+          <span class="suffix-input">
+            <input id="tax-rate" type="text" inputmode="decimal" autocomplete="off">
+            <span>%</span>
+          </span>
+        </label>
+      </div>
+      <p class="hint" id="formula"></p>
+    </section>
+
+    <section class="card">
+      <h2>People</h2>
+      <form id="add-person" class="inline-form" autocomplete="off">
+        <input id="person-name" type="text" placeholder="Name" enterkeyhint="done" maxlength="30">
+        <button type="submit" class="btn">Add</button>
+      </form>
+      <ul id="people" class="chips"></ul>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Items</h2>
+        <button type="button" class="btn" id="add-item">+ Item</button>
+      </div>
+      <p class="hint">Enter menu prices as printed. Tap names to mark who had each item. Shared items can be split evenly or by custom amounts.</p>
+      <ul id="items" class="items"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Who pays what</h2>
+      <div id="summary"></div>
+    </section>
+
+    <section class="card">
+      <h2>Check against the receipt</h2>
+      <div id="breakdown" class="breakdown"></div>
+    </section>
+  </main>
+
+  <footer class="total-bar">
+    <div>
+      <div class="total-label">Bill total</div>
+      <div class="total-value" id="grand-total">₱0.00</div>
+    </div>
+    <button type="button" class="btn btn-primary" id="share">Share</button>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="calc.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
