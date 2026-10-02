@@ -1,4 +1,4 @@
-const CACHE = "ezbill-v5";
+const CACHE = "ezbill-v6";
 const FILES = [
   "./",
   "index.html",

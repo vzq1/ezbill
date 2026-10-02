@@ -1,6 +1,6 @@
 # EZBill
 
-Bon's bill splitting app: an iPhone-style calculator for splitting a restaurant bill with friends. Add who ordered what, type in the total on the receipt, and it shares out the service charge by how much each person ordered, then shows Bon's GCash QR so everyone can pay.
+Bon's bill splitting app: a minimalist calculator for splitting a restaurant bill with friends. Add who ordered what, type in the total on the receipt, and it shares out the service charge by how much each person ordered, then shows Bon's GCash QR so everyone can pay.
 
 ## How the split works
 
@@ -17,7 +17,7 @@ Everyone's shares add up exactly to the receipt total, so you never need to know
 | File | What it is |
 | --- | --- |
 | `index.html` | The app's page |
-| `styles.css` | The iPhone-style look: glass cards, large titles and bottom sheets |
+| `styles.css` | The minimalist look: black and white, thin lines, light and dark mode |
 | `app.js` | People, items, sheets and sharing |
 | `calc.js` | The split math |
 | `gcash-qr.svg` | Bon's GCash QR, redrawn from the GCash app's QR so it stays sharp at any size |
@@ -27,7 +27,7 @@ Everyone's shares add up exactly to the receipt total, so you never need to know
 
 Open https://vzq1.github.io/ezbill/ in Safari, tap **Share → Add to Home Screen**, and name it **EZBill**. It works offline after the first visit.
 
-Tap the moon at the top right for dark mode. The GCash QR stays on a white card in both modes so it always scans.
+Tap the half-circle at the top right for dark mode. The GCash QR always stays black on white so it scans.
 
 ## Running it locally
 
@@ -39,5 +39,4 @@ python3 -m http.server
 
 ## Credits
 
-- Look and feel follow Bonjour, Bon’s morning routine app.
 - GCash and InstaPay are trademarks of their respective owners.

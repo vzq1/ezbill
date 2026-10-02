@@ -1,22 +1,12 @@
 const STORAGE_KEY = "bill-split-v1";
-const COLORS = ["#007AFF", "#FF9500", "#34C759", "#AF52DE", "#FF2D55", "#5AC8FA", "#FFCC00", "#5856D6", "#FF3B30", "#00C7BE"];
+const THEME_KEY = "bill-split-theme";
 const GCASH = {
   name: "ME****O TH****S J** B.",
   mobile: "0976 041 ••••",
   userId: "•••••••••••Y94CTA",
   qr: "gcash-qr.svg",
 };
-
-const ICONS = {
-  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
-  food: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10"/><path d="M17 21V3c-2.2 1.3-3.5 3.7-3.5 7v3H17"/></svg>',
-  chevron: '<svg class="chev" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>',
-  check: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
-  qr: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.5"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 20.5h.01M20.5 14h.01"/></svg>',
-  moon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
-  sun: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>',
-  wallet: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H17v2.5"/><rect x="4" y="7.5" width="16" height="11.5" rx="2.5"/><path d="M16 13.25h.01"/></svg>',
-};
+const THEME_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" stroke="none"/></svg>';
 
 const peso = new Intl.NumberFormat("en-PH", {
   style: "currency",
@@ -71,23 +61,6 @@ function el(tag, props = {}, children = []) {
   return node;
 }
 
-function svgEl(tag, attrs = {}) {
-  const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
-  return node;
-}
-
-function icon(name) {
-  const holder = document.createElement("span");
-  holder.innerHTML = ICONS[name];
-  return holder.firstElementChild;
-}
-
-function fitInput(input, min) {
-  const length = Math.max(input.value.length || input.placeholder.length, min);
-  input.style.width = `${length + 0.6}ch`;
-}
-
 function onActivate(node, fn) {
   node.addEventListener("click", fn);
   node.addEventListener("keydown", (e) => {
@@ -96,19 +69,6 @@ function onActivate(node, fn) {
       fn();
     }
   });
-}
-
-function colorFor(index) {
-  return COLORS[index % COLORS.length];
-}
-
-function initials(name) {
-  const words = name.trim().split(/\s+/);
-  return words.slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-}
-
-function personTile(person, index) {
-  return el("span", { class: "tile round", style: `background-color:${colorFor(index)}`, text: initials(person.name) });
 }
 
 function joinNames(names) {
@@ -143,7 +103,7 @@ function line(label, value, cls = "") {
 
 function field(label, control, extra = null) {
   return el("div", { class: "field" }, [
-    el("div", { class: "field-head" }, [el("span", { class: "field-label", text: label }), extra]),
+    el("div", { class: "field-head" }, [el("span", { class: "label", text: label }), extra]),
     control,
   ]);
 }
@@ -152,57 +112,25 @@ function field(label, control, extra = null) {
 
 function renderMain() {
   const result = computeSplit(state);
-  renderHero(result);
+  renderSummary(result);
   renderPeople(result);
   renderItems(result);
 }
 
-function renderHero(result) {
-  $("#grand-total").textContent = peso.format(result.billTotal);
-  $("#total-label").textContent = result.hasReceipt ? "Receipt total" : "Bill total";
-  $("#items-total").textContent = peso.format(result.itemsTotal);
-  $("#extra-total").textContent = result.hasReceipt ? peso.format(result.extra) : "—";
+function renderSummary(result) {
+  $("#food-total").textContent = peso.format(result.itemsTotal);
+  $("#service-total").textContent = result.hasReceipt ? peso.format(result.extra) : "—";
+  $("#rate").textContent = result.hasReceipt ? `${result.rate >= 0 ? "+" : "−"}${pct(Math.abs(result.rate))}` : "";
 
-  let note = "";
-  if (result.hasReceipt && result.rate >= 0) note = `+${pct(result.rate)} on top of everyone's food`;
-  else if (result.hasReceipt) note = `${pct(-result.rate)} off everyone's food`;
-  else if (result.itemsTotal > 0) note = "Enter the receipt total to split the service charge.";
-  $("#hero-note").textContent = note;
-
-  renderDonut(result);
-}
-
-function renderDonut(result) {
-  const r = 56;
-  const c = 2 * Math.PI * r;
-  const ring = svgEl("g", { transform: "rotate(-90 70 70)" });
-  ring.append(svgEl("circle", { class: "track", cx: 70, cy: 70, r, "stroke-width": 16 }));
-
-  const total = result.rows.reduce((sum, row) => sum + row.total, 0);
-  const active = result.rows.map((row, i) => ({ row, i })).filter(({ row }) => row.total > 0);
-  const gap = active.length > 1 ? 3 : 0;
-  let offset = 0;
-  for (const { row, i } of active) {
-    const len = (row.total / total) * c;
-    ring.append(svgEl("circle", {
-      class: "seg", cx: 70, cy: 70, r, "stroke-width": 16, stroke: colorFor(i),
-      "stroke-dasharray": `${Math.max(len - gap, 0.5)} ${c}`,
-      "stroke-dashoffset": -offset,
-    }));
-    offset += len;
-  }
-
-  const count = state.people.length;
-  const num = svgEl("text", { x: 70, y: 74, class: "donut-num", "text-anchor": "middle" });
-  num.textContent = count;
-  const sub = svgEl("text", { x: 70, y: 92, class: "donut-sub", "text-anchor": "middle" });
-  sub.textContent = count === 1 ? "person" : "people";
-  $("#donut").replaceChildren(ring, num, sub);
+  let hint = "";
+  if (state.people.length === 0 && state.items.length === 0) hint = "Add people and items below, then the receipt total.";
+  else if (!result.hasReceipt && result.itemsTotal > 0) hint = "Add the receipt total to share out the service charge.";
+  $("#summary-hint").textContent = hint;
 }
 
 const addPersonRow = (() => {
   const input = el("input", {
-    class: "add-input", type: "text", placeholder: "Add Person", maxlength: "30",
+    class: "add-input", type: "text", placeholder: "Add person", maxlength: "30",
     enterkeyhint: "done", autocomplete: "off", "aria-label": "Add person",
   });
   const button = el("button", { type: "button", class: "add-btn", text: "Add" });
@@ -222,23 +150,21 @@ const addPersonRow = (() => {
     }
   });
   button.addEventListener("click", submit);
-  return el("li", { class: "row add-row" }, [el("span", { class: "tile round" }, icon("plus")), input, button]);
+  return el("li", { class: "row add-row" }, [el("span", { class: "plus", text: "+" }), input, button]);
 })();
 
 function renderPeople(result) {
-  const count = state.people.length;
-  $("#people-count").textContent = count ? `${count} ${count === 1 ? "person" : "people"}` : "";
+  $("#people-count").textContent = state.people.length || "";
 
-  const rows = result.rows.map((r, i) => {
+  const rows = result.rows.map((r) => {
     let sub = "No items yet";
-    if (r.food > 0) sub = result.hasReceipt ? `Food ${peso.format(r.food)} · SC ${peso.format(r.extra)}` : `Food ${peso.format(r.food)}`;
+    if (r.food > 0) sub = result.hasReceipt ? `Food ${peso.format(r.food)} · Service ${peso.format(r.extra)}` : `Food ${peso.format(r.food)}`;
     const li = el("li", { class: "row", role: "button", tabindex: "0" }, [
-      personTile(state.people[i], i),
       el("div", { class: "row-main" }, [
         el("span", { class: "row-title", text: r.name }),
         el("span", { class: "row-sub", text: sub }),
       ]),
-      el("span", { class: "row-trail strong num" }, [peso.format(r.total), icon("chevron")]),
+      el("span", { class: "row-amount num", text: peso.format(r.total) }),
     ]);
     onActivate(li, () => openPersonSheet(r.id));
     return li;
@@ -251,8 +177,7 @@ function renderPeople(result) {
 }
 
 function renderItems(result) {
-  const count = state.items.length;
-  $("#items-count").textContent = count ? `${count} ${count === 1 ? "item" : "items"}` : "";
+  $("#items-count").textContent = state.items.length || "";
 
   const rows = state.items.map((item) => {
     const names = eatersOf(item).map((p) => p.name);
@@ -261,37 +186,36 @@ function renderItems(result) {
     if (note) sub = sub ? `${sub} · ${note.text}` : note.text;
     const name = item.name.trim();
     const li = el("li", { class: "row", role: "button", tabindex: "0" }, [
-      el("span", { class: "tile", style: "background-color:#FF9500" }, icon("food")),
       el("div", { class: "row-main" }, [
         el("span", { class: name ? "row-title" : "row-title placeholder", text: name || "Item" }),
         el("span", { class: note && note.warn ? "row-sub err" : "row-sub", text: sub }),
       ]),
-      el("span", { class: "row-trail num" }, [peso.format(toNumber(item.price)), icon("chevron")]),
+      el("span", { class: "row-amount light num", text: peso.format(toNumber(item.price)) }),
     ]);
     onActivate(li, () => openItemSheet(item.id));
     return li;
   });
 
   const add = el("li", { class: "row add-row", role: "button", tabindex: "0" }, [
-    el("span", { class: "tile" }, icon("plus")),
-    el("span", { class: "row-title", text: "Add Item" }),
+    el("span", { class: "plus", text: "+" }),
+    el("span", { class: "add-label", text: "Add item" }),
   ]);
   onActivate(add, () => openItemSheet(null));
   $("#items").replaceChildren(...rows, add);
 
-  const footnote = $("#items-note");
-  let text = "Enter menu prices as printed on the receipt.";
+  const note = $("#items-note");
+  let text = "Enter menu prices as printed.";
   if (result.unassigned > 0) text = `${peso.format(result.unassigned)} of the items isn't assigned to anyone yet.`;
   else if (result.unassigned < 0) text = `People's shares add up to ${peso.format(-result.unassigned)} more than the item prices.`;
-  footnote.textContent = text;
-  footnote.classList.toggle("err", result.unassigned !== 0);
+  note.textContent = text;
+  note.classList.toggle("err", result.unassigned !== 0);
 }
 
 function addPerson(name) {
   const clean = name.trim().replace(/\s+/g, " ");
   if (!clean) return false;
   if (state.people.some((p) => p.name.toLowerCase() === clean.toLowerCase())) {
-    toast("Already added", `${clean} is already on the list`);
+    toast(`${clean} is already on the list`);
     return false;
   }
   state.people.push({ id: newId(), name: clean });
@@ -354,7 +278,7 @@ function closeSheet() {
     sheet.hidden = true;
     scrim.hidden = true;
     $("#sheet-body").replaceChildren();
-  }, 400);
+  }, 300);
 }
 
 scrim.addEventListener("click", closeSheet);
@@ -369,28 +293,26 @@ function openItemSheet(id) {
     : { id: newId(), name: "", price: "", people: [], custom: false, shares: {} };
 
   const nameInput = el("input", {
-    class: "input", type: "text", placeholder: "e.g. Pizza", maxlength: "40",
+    class: "line-input", type: "text", placeholder: "e.g. Pizza", maxlength: "40",
     autocomplete: "off", "aria-label": "Item name",
   });
   nameInput.value = draft.name;
   nameInput.addEventListener("input", () => (draft.name = nameInput.value));
 
   const priceInput = el("input", {
-    class: "input big num", type: "text", inputmode: "decimal", placeholder: "0",
+    class: "num", type: "text", inputmode: "decimal", placeholder: "0.00",
     autocomplete: "off", "aria-label": "Price",
   });
   priceInput.value = draft.price;
-  fitInput(priceInput, 1);
   priceInput.addEventListener("input", () => {
     draft.price = priceInput.value;
-    fitInput(priceInput, 1);
     refreshNote();
   });
 
-  const whoLink = el("button", { type: "button", class: "link" });
-  const whoList = el("ul", { class: "list" });
-  const segmentBox = el("div", { class: "segment-box" });
-  const note = el("p", { class: "field-note" });
+  const allButton = el("button", { type: "button", class: "text-btn" });
+  const chips = el("div", { class: "chips" });
+  const mode = el("div", { class: "mode" });
+  const note = el("p", { class: "note" });
 
   function sortPeople(ids) {
     return state.people.map((p) => p.id).filter((pid) => ids.includes(pid));
@@ -416,53 +338,50 @@ function openItemSheet(id) {
 
   function renderParts() {
     if (state.people.length === 0) {
-      whoLink.hidden = true;
-      whoList.replaceChildren(el("li", { class: "row" }, el("span", { class: "row-sub", text: "Add people on the main screen first." })));
+      allButton.hidden = true;
+      chips.replaceChildren(el("p", { class: "note", text: "Add people on the main screen first." }));
     } else {
       const everyone = state.people.every((p) => draft.people.includes(p.id));
-      whoLink.hidden = state.people.length < 2;
-      whoLink.textContent = everyone ? "Clear" : "Everyone";
-      whoLink.onclick = () => {
+      allButton.hidden = state.people.length < 2;
+      allButton.textContent = everyone ? "Clear" : "All";
+      allButton.onclick = () => {
         draft.people = everyone ? [] : state.people.map((p) => p.id);
         renderParts();
       };
-      const custom = draft.custom && draft.people.length > 1;
-      whoList.replaceChildren(...state.people.map((p, i) => {
+      chips.replaceChildren(...state.people.map((p) => {
         const selected = draft.people.includes(p.id);
-        const row = el("li", { class: "row", role: "checkbox", "aria-checked": String(selected), tabindex: "0" }, [
-          personTile(p, i),
-          el("div", { class: "row-main" }, el("span", { class: "row-title", text: p.name })),
-        ]);
-        if (custom && selected) {
-          const input = el("input", {
-            class: "share-input num", type: "text", inputmode: "decimal", placeholder: "0.00",
-            autocomplete: "off", "aria-label": `${p.name}'s share`,
-          });
-          input.value = draft.shares[p.id] ?? "";
-          input.addEventListener("click", (e) => e.stopPropagation());
-          input.addEventListener("keydown", (e) => e.stopPropagation());
-          input.addEventListener("input", () => {
-            draft.shares[p.id] = input.value;
-            refreshNote();
-          });
-          row.append(input);
-        }
-        row.append(el("span", { class: "check" }, icon("check")));
-        onActivate(row, () => {
-          draft.people = selected ? draft.people.filter((pid) => pid !== p.id) : sortPeople([...draft.people, p.id]);
-          renderParts();
+        return el("button", {
+          type: "button", class: "chip", "aria-pressed": String(selected), text: p.name,
+          onclick: () => {
+            draft.people = selected ? draft.people.filter((pid) => pid !== p.id) : sortPeople([...draft.people, p.id]);
+            renderParts();
+          },
         });
-        return row;
       }));
     }
 
     if (draft.people.length < 2) {
-      segmentBox.replaceChildren();
+      mode.replaceChildren();
     } else {
-      segmentBox.replaceChildren(el("div", { class: "segment", role: "group", "aria-label": "How to split" }, [
-        el("button", { type: "button", "aria-pressed": String(!draft.custom), text: "Split evenly", onclick: () => setCustom(false) }),
-        el("button", { type: "button", "aria-pressed": String(!!draft.custom), text: "Custom amounts", onclick: () => setCustom(true) }),
-      ]));
+      const parts = [el("div", { class: "tabs", role: "group", "aria-label": "How to split" }, [
+        el("button", { type: "button", class: "tab", "aria-pressed": String(!draft.custom), text: "Split evenly", onclick: () => setCustom(false) }),
+        el("button", { type: "button", class: "tab", "aria-pressed": String(!!draft.custom), text: "Custom amounts", onclick: () => setCustom(true) }),
+      ])];
+      if (draft.custom) {
+        for (const p of eatersOf(draft)) {
+          const input = el("input", {
+            class: "num", type: "text", inputmode: "decimal", placeholder: "0.00",
+            autocomplete: "off", "aria-label": `${p.name}'s share`,
+          });
+          input.value = draft.shares[p.id] ?? "";
+          input.addEventListener("input", () => {
+            draft.shares[p.id] = input.value;
+            refreshNote();
+          });
+          parts.push(el("label", { class: "share-row" }, [el("span", { text: p.name }), input]));
+        }
+      }
+      mode.replaceChildren(...parts);
     }
     refreshNote();
   }
@@ -491,14 +410,14 @@ function openItemSheet(id) {
   };
 
   openSheet({
-    title: existing ? "Edit Item" : "New Item",
+    title: existing ? "Edit item" : "New item",
     left: { label: "Cancel", onClick: closeSheet },
     right: { label: existing ? "Done" : "Add", onClick: done },
     body: [
-      field("Item", el("div", { class: "well" }, nameInput)),
-      field("Price", el("label", { class: "well price-well" }, [el("span", { text: "₱" }), priceInput])),
-      field("Who had this", el("div", { class: "who" }, [whoList, segmentBox, note]), whoLink),
-      existing ? el("button", { type: "button", class: "btn btn-danger", text: "Delete Item", onclick: remove }) : null,
+      field("Item", nameInput),
+      field("Price", el("label", { class: "price" }, [el("span", { text: "₱" }), priceInput])),
+      field("Who had this", el("div", { class: "field" }, [chips, mode, note]), allButton),
+      existing ? el("button", { type: "button", class: "btn btn-danger", text: "Delete item", onclick: remove }) : null,
     ],
   });
 }
@@ -513,7 +432,7 @@ function openPersonSheet(id) {
   const result = computeSplit(state);
   const row = result.rows[index];
 
-  const nameInput = el("input", { class: "input", type: "text", maxlength: "30", autocomplete: "off", "aria-label": "Name" });
+  const nameInput = el("input", { class: "line-input", type: "text", maxlength: "30", autocomplete: "off", "aria-label": "Name" });
   nameInput.value = person.name;
 
   const validIds = new Set(state.people.map((p) => p.id));
@@ -535,7 +454,7 @@ function openPersonSheet(id) {
     const clean = nameInput.value.trim().replace(/\s+/g, " ");
     if (!clean || clean === person.name) return true;
     if (state.people.some((p) => p.id !== id && p.name.toLowerCase() === clean.toLowerCase())) {
-      toast("Name already used", `${clean} is already on the list`);
+      toast(`${clean} is already on the list`);
       return false;
     }
     person.name = clean;
@@ -549,30 +468,13 @@ function openPersonSheet(id) {
     left: { label: "Cancel", onClick: closeSheet },
     right: { label: "Done", onClick: () => applyName() && closeSheet() },
     body: [
-      field("Name", el("div", { class: "well" }, nameInput)),
-      field("Items", el("div", { class: "well lines" }, itemLines)),
-      el("div", { class: "well lines" }, totals),
-      el("button", { type: "button", class: "btn btn-primary", onclick: () => applyName() && openQrSheet(id) }, [icon("qr"), "Show GCash QR"]),
-      el("button", { type: "button", class: "btn btn-danger", text: "Remove Person", onclick: () => removePerson(id) }),
+      field("Name", nameInput),
+      field("Items", el("div", { class: "lines" }, itemLines)),
+      el("div", { class: "lines" }, totals),
+      el("button", { type: "button", class: "btn btn-solid", text: "Show GCash QR", onclick: () => applyName() && openQrSheet(id) }),
+      el("button", { type: "button", class: "btn btn-danger", text: "Remove person", onclick: () => removePerson(id) }),
     ],
   });
-}
-
-function qrCard() {
-  return el("div", { class: "qr-card" }, [
-    el("div", { class: "qr-head" }, [
-      el("span", { class: "qr-brand" }, [el("span", { class: "qr-badge" }, icon("wallet")), "GCash"]),
-      el("span", { class: "qr-chip", text: "InstaPay" }),
-    ]),
-    el("div", { class: "qr-frame" }, [
-      el("i"), el("i"), el("i"), el("i"),
-      el("img", { class: "qr-img", src: GCASH.qr, alt: `GCash QR code for ${GCASH.name}`, width: "300", height: "300" }),
-    ]),
-    el("div", { class: "qr-name", text: GCASH.name }),
-    el("div", { class: "qr-meta" }, ["Mobile No. ", el("b", { text: GCASH.mobile })]),
-    el("div", { class: "qr-meta" }, ["User ID ", el("b", { text: GCASH.userId })]),
-    el("div", { class: "qr-fee", text: "Transfer fees may apply." }),
-  ]);
 }
 
 function openQrSheet(personId = null) {
@@ -580,21 +482,29 @@ function openQrSheet(personId = null) {
   const index = state.people.findIndex((p) => p.id === personId);
   const row = index >= 0 ? result.rows[index] : null;
   openSheet({
-    title: "Pay with GCash",
+    title: "GCash",
     left: row ? { label: "Back", onClick: () => openPersonSheet(personId) } : null,
     right: { label: "Done", onClick: closeSheet },
     body: [
-      row ? el("div", { class: "pay-amount" }, [
+      row ? el("div", { class: "pay" }, [
         el("span", { class: "pay-who", text: `${row.name} pays` }),
         el("span", { class: "pay-big num", text: peso.format(row.total) }),
       ]) : null,
-      qrCard(),
-      el("p", { class: "field-note center", text: "Scan with GCash or any InstaPay bank app. Turn up the screen brightness if it doesn't scan right away." }),
+      el("div", { class: "qr" }, [
+        el("span", { class: "qr-label", text: "GCash · InstaPay" }),
+        el("div", { class: "qr-box" }, el("img", { src: GCASH.qr, alt: `GCash QR code for ${GCASH.name}`, width: "300", height: "300" })),
+        el("div", {}, [
+          el("div", { class: "qr-name", text: GCASH.name }),
+          el("div", { class: "qr-meta", text: `Mobile ${GCASH.mobile}` }),
+          el("div", { class: "qr-meta", text: `User ID ${GCASH.userId}` }),
+        ]),
+      ]),
+      el("p", { class: "note center", text: "Scan with GCash or any InstaPay app. Transfer fees may apply." }),
     ],
   });
 }
 
-/* ---------- Sharing and alerts ---------- */
+/* ---------- Sharing and messages ---------- */
 
 function summaryText() {
   const result = computeSplit(state);
@@ -609,7 +519,7 @@ function summaryText() {
 
 async function share() {
   if (state.people.length === 0) {
-    toast("Nothing to share yet", "Add people and items first");
+    toast("Add people and items first");
     return;
   }
   const text = summaryText();
@@ -623,45 +533,42 @@ async function share() {
   }
   try {
     await navigator.clipboard.writeText(text);
-    toast("Copied", "Paste the split into your group chat");
+    toast("Copied. Paste it in your group chat");
   } catch (e) {
-    toast("Couldn't copy", "Your browser blocked the clipboard");
+    toast("Couldn't copy the split");
   }
 }
 
 let toastTimer;
 let toastHideTimer;
-function toast(title, sub = "") {
+function toast(message) {
   const node = $("#toast");
   clearTimeout(toastTimer);
   clearTimeout(toastHideTimer);
-  $("#toast-title").textContent = title;
-  $("#toast-sub").textContent = sub;
+  node.textContent = message;
   node.hidden = false;
   void node.offsetHeight;
   node.classList.add("show");
   toastTimer = setTimeout(() => {
     node.classList.remove("show");
-    toastHideTimer = setTimeout(() => (node.hidden = true), 600);
-  }, 2400);
+    toastHideTimer = setTimeout(() => (node.hidden = true), 250);
+  }, 2200);
 }
 
-/* ---------- Wiring ---------- */
+/* ---------- Theme ---------- */
 
-const THEME_KEY = "bill-split-theme";
 let theme = document.documentElement.dataset.mode === "dark" ? "dark" : "light";
 
 function applyTheme() {
   const dark = theme === "dark";
   if (dark) document.documentElement.dataset.mode = "dark";
   else delete document.documentElement.dataset.mode;
-  document.querySelector('meta[name="theme-color"]').content = dark ? "#04060B" : "#EDF1F7";
+  document.querySelector('meta[name="theme-color"]').content = dark ? "#0E0E0E" : "#FFFFFF";
   document.querySelector('meta[name="color-scheme"]').content = dark ? "dark" : "light";
-  const button = $("#theme-btn");
-  button.replaceChildren(icon(dark ? "sun" : "moon"));
-  button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+  $("#theme-btn").setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
 }
 
+$("#theme-btn").innerHTML = THEME_ICON;
 $("#theme-btn").addEventListener("click", () => {
   theme = theme === "dark" ? "light" : "dark";
   try {
@@ -671,14 +578,12 @@ $("#theme-btn").addEventListener("click", () => {
 });
 applyTheme();
 
-$("#today").textContent = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+/* ---------- Wiring ---------- */
 
 const receiptInput = $("#receipt-total");
 receiptInput.value = state.receiptTotal;
-fitInput(receiptInput, 4);
 receiptInput.addEventListener("input", () => {
   state.receiptTotal = receiptInput.value;
-  fitInput(receiptInput, 4);
   persist();
   renderMain();
 });
@@ -691,13 +596,9 @@ $("#new-bill").addEventListener("click", () => {
   if (!confirm("Start a new bill? This clears everyone and all items.")) return;
   state = defaultState();
   receiptInput.value = "";
-  fitInput(receiptInput, 4);
   persist();
   renderMain();
 });
-
-const navbar = $("#navbar");
-window.addEventListener("scroll", () => navbar.classList.toggle("show", window.scrollY > 56), { passive: true });
 
 renderMain();
 
