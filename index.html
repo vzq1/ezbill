@@ -12,6 +12,15 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Bill Split">
+  <script>
+    try {
+      if (localStorage.getItem("bill-split-theme") === "dark") {
+        document.documentElement.dataset.mode = "dark";
+        document.querySelector('meta[name="theme-color"]').content = "#04060B";
+        document.querySelector('meta[name="color-scheme"]').content = "dark";
+      }
+    } catch (e) {}
+  </script>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -32,6 +41,7 @@
         <p class="eyebrow" id="today"></p>
         <h1>Bill Split</h1>
       </div>
+      <button type="button" class="round-btn glass" id="theme-btn" aria-label="Switch to dark mode"></button>
     </header>
 
     <div class="card glass hero">

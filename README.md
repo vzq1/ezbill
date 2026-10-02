@@ -27,6 +27,8 @@ Everyone's shares add up exactly to the receipt total, so you never need to know
 
 Open https://vzq1.github.io/bill-split/ in Safari, tap **Share → Add to Home Screen**, and name it **Bill Split**. It works offline after the first visit.
 
+Tap the moon at the top right for dark mode. The GCash QR stays on a white card in both modes so it always scans.
+
 ## Running it locally
 
 There's no build step. Serve the folder and open http://localhost:8000:

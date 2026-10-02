@@ -13,6 +13,8 @@ const ICONS = {
   chevron: '<svg class="chev" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l6 6-6 6"/></svg>',
   check: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   qr: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1.5"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1.5"/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 20.5h.01M20.5 14h.01"/></svg>',
+  moon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+  sun: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>',
   wallet: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H17v2.5"/><rect x="4" y="7.5" width="16" height="11.5" rx="2.5"/><path d="M16 13.25h.01"/></svg>',
 };
 
@@ -645,6 +647,29 @@ function toast(title, sub = "") {
 }
 
 /* ---------- Wiring ---------- */
+
+const THEME_KEY = "bill-split-theme";
+let theme = document.documentElement.dataset.mode === "dark" ? "dark" : "light";
+
+function applyTheme() {
+  const dark = theme === "dark";
+  if (dark) document.documentElement.dataset.mode = "dark";
+  else delete document.documentElement.dataset.mode;
+  document.querySelector('meta[name="theme-color"]').content = dark ? "#04060B" : "#EDF1F7";
+  document.querySelector('meta[name="color-scheme"]').content = dark ? "dark" : "light";
+  const button = $("#theme-btn");
+  button.replaceChildren(icon(dark ? "sun" : "moon"));
+  button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+}
+
+$("#theme-btn").addEventListener("click", () => {
+  theme = theme === "dark" ? "light" : "dark";
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch (e) {}
+  applyTheme();
+});
+applyTheme();
 
 $("#today").textContent = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
