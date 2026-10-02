@@ -8,14 +8,14 @@ const peso = new Intl.NumberFormat("en-PH", {
 });
 
 function defaultState() {
-  return { scRate: "10", vatRate: "12", taxRate: "0", people: [], items: [] };
+  return { receiptTotal: "", people: [], items: [] };
 }
 
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (saved && Array.isArray(saved.people) && Array.isArray(saved.items)) {
-      return { ...defaultState(), ...saved };
+      return { receiptTotal: saved.receiptTotal || "", people: saved.people, items: saved.items };
     }
   } catch (e) {}
   return defaultState();
@@ -33,8 +33,8 @@ function newId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-function pct(text) {
-  return `${round2(toNumber(text))}%`;
+function pct(rate) {
+  return `${round2(rate * 100)}%`;
 }
 
 const $ = (sel) => document.querySelector(sel);
@@ -51,15 +51,6 @@ function el(tag, props = {}, children = []) {
     if (child != null) node.append(child);
   }
   return node;
-}
-
-function renderFormula() {
-  const divisor = round2(1 + toNumber(state.vatRate) / 100);
-  const lines = [`Service charge = price ÷ ${divisor} × ${pct(state.scRate)}`];
-  if (toNumber(state.taxRate) > 0) {
-    lines.push(`Other tax = price ÷ ${divisor} × ${pct(state.taxRate)}`);
-  }
-  $("#formula").textContent = `${lines.join(" · ")}. Both are computed on the price before VAT.`;
 }
 
 function renderPeople() {
@@ -259,12 +250,6 @@ function renderItems() {
   list.replaceChildren(...state.items.map(renderItem));
 }
 
-function detailLine(r, showTax) {
-  const bits = [`Food ${peso.format(r.food)}`, `SC ${peso.format(r.serviceCharge)}`];
-  if (showTax) bits.push(`Tax ${peso.format(r.tax)}`);
-  return bits.join(" · ");
-}
-
 function line(label, value, cls = "") {
   return el("div", { class: `bill-line ${cls}`.trim() }, [
     el("span", { text: label }),
@@ -272,49 +257,61 @@ function line(label, value, cls = "") {
   ]);
 }
 
+function renderBreakdown(result) {
+  const box = $("#breakdown");
+  if (!result.hasReceipt) {
+    box.replaceChildren(line("Items total", result.itemsTotal));
+    return;
+  }
+  const parts = [
+    line("Items total", result.itemsTotal),
+    line(result.extra >= 0 ? "Service charge & other charges" : "Discount", result.extra),
+    line("Receipt total", result.receiptTotal, "grand"),
+  ];
+  const direction = result.rate >= 0 ? "on top of" : "off";
+  parts.push(el("p", { class: "hint", text: `That's ${pct(Math.abs(result.rate))} ${direction} each person's food.` }));
+  box.replaceChildren(...parts);
+}
+
 function renderSummary() {
   const result = computeSplit(state);
-  const showTax = toNumber(state.taxRate) > 0;
-  $("#grand-total").textContent = peso.format(result.bill.total);
+  $("#grand-total").textContent = peso.format(result.billTotal);
+  $("#total-label").textContent = result.hasReceipt ? "Receipt total" : "Items total";
+  renderBreakdown(result);
 
   const people = $("#summary");
   if (state.people.length === 0) {
     people.replaceChildren(el("p", { class: "empty", text: "Add people and items to see the split." }));
-  } else {
-    const rows = result.rows.map((r) =>
-      el("div", { class: "person-row" }, [
-        el("div", { class: "person-main" }, [
-          el("span", { class: "person-name", text: r.name }),
-          el("span", { class: "person-total", text: peso.format(r.total) }),
-        ]),
-        el("div", { class: "person-detail", text: detailLine(r, showTax) }),
-      ])
-    );
-    if (result.unassigned > 0) {
-      rows.push(el("p", { class: "warn-line", text: `${peso.format(result.unassigned)} of the items isn't assigned to anyone yet.` }));
-    } else if (result.unassigned < 0) {
-      rows.push(el("p", { class: "warn-line", text: `People's shares add up to ${peso.format(-result.unassigned)} more than the item prices.` }));
-    }
-    people.replaceChildren(...rows);
+    return;
   }
 
-  const b = result.bill;
-  const lines = [
-    line("Items total", result.itemsTotal),
-    line(`VATable sales`, b.beforeVat, "sub"),
-    line(`VAT ${pct(state.vatRate)}`, b.vat, "sub"),
-    line(`Service charge ${pct(state.scRate)}`, b.serviceCharge),
-  ];
-  if (showTax) lines.push(line(`Other tax ${pct(state.taxRate)}`, b.tax));
-  lines.push(line("Total", b.total, "grand"));
-  $("#breakdown").replaceChildren(...lines);
+  const rows = result.rows.map((r) =>
+    el("div", { class: "person-row" }, [
+      el("div", { class: "person-main" }, [
+        el("span", { class: "person-name", text: r.name }),
+        el("span", { class: "person-total", text: peso.format(r.total) }),
+      ]),
+      el("div", {
+        class: "person-detail",
+        text: result.hasReceipt
+          ? `Food ${peso.format(r.food)} · SC ${peso.format(r.extra)}`
+          : `Food ${peso.format(r.food)}`,
+      }),
+    ])
+  );
+  if (!result.hasReceipt && result.itemsTotal > 0) {
+    rows.push(el("p", { class: "hint", text: "Enter the receipt total to add everyone's share of the service charge." }));
+  }
+  if (result.unassigned > 0) {
+    rows.push(el("p", { class: "warn-line", text: `${peso.format(result.unassigned)} of the items isn't assigned to anyone yet.` }));
+  } else if (result.unassigned < 0) {
+    rows.push(el("p", { class: "warn-line", text: `People's shares add up to ${peso.format(-result.unassigned)} more than the item prices.` }));
+  }
+  people.replaceChildren(...rows);
 }
 
 function renderAll() {
-  $("#sc-rate").value = state.scRate;
-  $("#vat-rate").value = state.vatRate;
-  $("#tax-rate").value = state.taxRate;
-  renderFormula();
+  $("#receipt-total").value = state.receiptTotal;
   renderPeople();
   renderItems();
   renderSummary();
@@ -368,12 +365,12 @@ function removeItem(id) {
 
 function summaryText() {
   const result = computeSplit(state);
-  const b = result.bill;
   const lines = ["Bill split", ...result.rows.map((r) => `${r.name}: ${peso.format(r.total)}`), ""];
   lines.push(`Items: ${peso.format(result.itemsTotal)}`);
-  lines.push(`Service charge (${pct(state.scRate)}): ${peso.format(b.serviceCharge)}`);
-  if (toNumber(state.taxRate) > 0) lines.push(`Other tax (${pct(state.taxRate)}): ${peso.format(b.tax)}`);
-  lines.push(`Total: ${peso.format(b.total)}`);
+  if (result.hasReceipt) {
+    lines.push(`${result.extra >= 0 ? "Service charge" : "Discount"}: ${peso.format(result.extra)}`);
+  }
+  lines.push(`Total: ${peso.format(result.billTotal)}`);
   return lines.join("\n");
 }
 
@@ -419,19 +416,16 @@ $("#add-person").addEventListener("submit", (e) => {
 $("#add-item").addEventListener("click", addItem);
 $("#share").addEventListener("click", share);
 
-for (const [selector, key] of [["#sc-rate", "scRate"], ["#vat-rate", "vatRate"], ["#tax-rate", "taxRate"]]) {
-  $(selector).addEventListener("input", (e) => {
-    state[key] = e.target.value;
-    renderFormula();
-    renderSummary();
-    save();
-  });
-}
+$("#receipt-total").addEventListener("input", (e) => {
+  state.receiptTotal = e.target.value;
+  renderSummary();
+  save();
+});
 
 $("#new-bill").addEventListener("click", () => {
   if (state.items.length === 0 && state.people.length === 0) return;
   if (!confirm("Start a new bill? This clears all people and items.")) return;
-  state = { ...defaultState(), scRate: state.scRate, vatRate: state.vatRate, taxRate: state.taxRate };
+  state = defaultState();
   save();
   renderAll();
 });

@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Bill Split</title>
-  <meta name="description" content="Split a restaurant bill with friends, with the service charge computed on the price before VAT.">
+  <meta name="description" content="Split a restaurant bill with friends. Each person's share of the service charge is based on what they ordered.">
+  <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
@@ -22,34 +23,6 @@
   </header>
 
   <main>
-    <section class="card">
-      <h2>Rates</h2>
-      <div class="rates">
-        <label class="field">
-          <span>Service charge</span>
-          <span class="suffix-input">
-            <input id="sc-rate" type="text" inputmode="decimal" autocomplete="off">
-            <span>%</span>
-          </span>
-        </label>
-        <label class="field">
-          <span>VAT</span>
-          <span class="suffix-input">
-            <input id="vat-rate" type="text" inputmode="decimal" autocomplete="off">
-            <span>%</span>
-          </span>
-        </label>
-        <label class="field">
-          <span>Other tax</span>
-          <span class="suffix-input">
-            <input id="tax-rate" type="text" inputmode="decimal" autocomplete="off">
-            <span>%</span>
-          </span>
-        </label>
-      </div>
-      <p class="hint" id="formula"></p>
-    </section>
-
     <section class="card">
       <h2>People</h2>
       <form id="add-person" class="inline-form" autocomplete="off">
@@ -69,19 +42,25 @@
     </section>
 
     <section class="card">
-      <h2>Who pays what</h2>
-      <div id="summary"></div>
+      <h2>Receipt</h2>
+      <label class="field" for="receipt-total">Total on the receipt</label>
+      <span class="prefix-input">
+        <span>₱</span>
+        <input id="receipt-total" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off">
+      </span>
+      <p class="hint">Include the service charge. It's divided among everyone based on what they ordered, so you don't need to know the rate.</p>
+      <div id="breakdown" class="breakdown"></div>
     </section>
 
     <section class="card">
-      <h2>Check against the receipt</h2>
-      <div id="breakdown" class="breakdown"></div>
+      <h2>Who pays what</h2>
+      <div id="summary"></div>
     </section>
   </main>
 
   <footer class="total-bar">
     <div>
-      <div class="total-label">Bill total</div>
+      <div class="total-label" id="total-label">Items total</div>
       <div class="total-value" id="grand-total">₱0.00</div>
     </div>
     <button type="button" class="btn btn-primary" id="share">Share</button>

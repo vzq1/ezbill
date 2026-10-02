@@ -1,4 +1,4 @@
-const CACHE = "bill-split-v1";
+const CACHE = "bill-split-v2";
 const FILES = [
   "./",
   "index.html",

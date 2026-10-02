@@ -2,19 +2,19 @@
 
 A small web app for splitting a restaurant bill with friends.
 
-Menu prices in the Philippines already include 12% VAT, but the service charge is computed on the price **before** VAT. So multiplying each person's food by 10% gives the wrong amount. This app works out each person's share correctly:
+You don't need to know the service charge rate. Enter what everyone ordered and the total on the receipt, and the app divides that total among everyone in proportion to their food:
 
 ```
-service charge = price ÷ 1.12 × 10%
-other tax      = price ÷ 1.12 × rate   (optional, e.g. F&W tax)
-you pay        = food + service charge + other tax
+your share = your food ÷ items total × receipt total
 ```
+
+Whatever the receipt adds on top of the menu prices (service charge, F&W tax, and so on) is shared out automatically, and everyone's shares add up exactly to the receipt total.
 
 ## Features
 
 - Add the people at the table and the items on the receipt
 - Assign each item to one person, or split it evenly or by custom amounts
-- See what each person pays, plus a receipt-style breakdown to check against the bill
+- Enter the receipt total and see what each person pays, including their share of the service charge
 - Share the split to a group chat
 - Works offline and can be added to your phone's home screen
 

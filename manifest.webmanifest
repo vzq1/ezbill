@@ -1,7 +1,7 @@
 {
   "name": "Bill Split",
   "short_name": "Bill Split",
-  "description": "Split a restaurant bill with friends, with the service charge computed on the price before VAT.",
+  "description": "Split a restaurant bill with friends. Each person's share of the service charge is based on what they ordered.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

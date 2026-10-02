@@ -9,21 +9,7 @@
   --accent-text: #ffffff;
   --danger: #b42318;
   --radius: 14px;
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #121514;
-    --surface: #1c201f;
-    --text: #eceeed;
-    --muted: #9aa29f;
-    --border: #2c3230;
-    --accent: #2dd4bf;
-    --accent-soft: #163a35;
-    --accent-text: #062b27;
-    --danger: #f97066;
-  }
+  color-scheme: light;
 }
 
 * {
@@ -143,35 +129,40 @@ input:focus {
   cursor: pointer;
 }
 
-.rates {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
 .field {
-  display: grid;
-  gap: 4px;
+  display: block;
   font-size: 0.85rem;
   color: var(--muted);
+  margin-bottom: 4px;
 }
 
-.suffix-input {
+.prefix-input {
   position: relative;
   display: block;
 }
 
-.suffix-input input {
-  padding-right: 28px;
+.prefix-input input {
+  padding-left: 30px;
+  font-size: 1.15rem;
+  font-weight: 600;
 }
 
-.suffix-input span {
+.prefix-input span {
   position: absolute;
-  right: 10px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 1.15rem;
+}
+
+.breakdown {
+  margin-top: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdown:empty {
+  display: none;
 }
 
 .inline-form {
@@ -371,10 +362,6 @@ input:focus {
   color: var(--muted);
   font-size: 0.8rem;
   margin-top: 2px;
-  font-variant-numeric: tabular-nums;
-}
-
-.breakdown {
   font-variant-numeric: tabular-nums;
 }
 
